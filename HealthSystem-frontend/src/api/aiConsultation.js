@@ -1,12 +1,30 @@
 import request from '@/utils/request'
 
 export default {
-  // AI咨询
+  // 兼容旧接口：单轮AI咨询
   consultAI(question) {
     return request({
       url: '/ai/consult',
       method: 'post',
       data: { question }
+    })
+  },
+
+  // 开启多轮会话
+  startChat(userId) {
+    return request({
+      url: '/ai/chat/start',
+      method: 'post',
+      data: { userId }
+    })
+  },
+
+  // 发送多轮消息
+  sendChatMessage({ sessionId, question, userId }) {
+    return request({
+      url: '/ai/chat/message',
+      method: 'post',
+      data: { sessionId, question, userId }
     })
   },
 
@@ -75,4 +93,3 @@ export default {
     })
   }
 }
-

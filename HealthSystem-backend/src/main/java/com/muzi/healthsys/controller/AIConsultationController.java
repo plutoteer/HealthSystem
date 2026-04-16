@@ -15,21 +15,16 @@ import java.util.Map;
 
 /**
  * AI健康咨询Controller
- *
- * @author MuZi
- * @since 2025-01-XX
  */
 @RestController
 @RequestMapping("/ai")
 public class AIConsultationController {
-    
+
     @Autowired
     private IAIConsultationService aiConsultationService;
-    
+
     /**
-     * AI咨询接口
-     * @param request 请求参数，包含question字段
-     * @return 回答内容
+     * 兼容旧接口（单轮）
      */
     @PostMapping("/consult")
     public Unification<String> consult(@RequestBody Map<String, String> request) {
@@ -37,26 +32,57 @@ public class AIConsultationController {
         String answer = aiConsultationService.getAnswer(question);
         return Unification.success(answer, "咨询成功");
     }
-    
+
     /**
-     * 获取所有问答列表（用于管理）
-     * @return 问答列表
+     * 创建会话
      */
+    @PostMapping("/chat/start")
+    public Unification<Map<String, Object>> startChat(@RequestBody(required = false) Map<String, Object> request) {
+        Integer userId = null;
+        if (request != null && request.get("userId") != null) {
+            try {
+                userId = Integer.parseInt(String.valueOf(request.get("userId")));
+            } catch (Exception ignored) {
+            }
+        }
+        String sessionId = aiConsultationService.startSession(userId);
+        Map<String, Object> data = new HashMap<>();
+        data.put("sessionId", sessionId);
+        data.put("welcome", "您好，我是AI健康顾问。您可以咨询症状分诊或医保报销政策。");
+        return Unification.success(data, "会话创建成功");
+    }
+
+    /**
+     * 多轮对话（结构化问诊 + 政策导航）
+     */
+    @PostMapping("/chat/message")
+    public Unification<Map<String, Object>> chat(@RequestBody Map<String, Object> request) {
+        String sessionId = request.get("sessionId") == null ? null : String.valueOf(request.get("sessionId"));
+        String question = request.get("question") == null ? null : String.valueOf(request.get("question"));
+
+        Integer userId = null;
+        if (request.get("userId") != null) {
+            try {
+                userId = Integer.parseInt(String.valueOf(request.get("userId")));
+            } catch (Exception ignored) {
+            }
+        }
+
+        if (!StringUtils.hasLength(sessionId)) {
+            sessionId = aiConsultationService.startSession(userId);
+        }
+
+        Map<String, Object> data = aiConsultationService.chat(sessionId, userId, question);
+        data.put("sessionId", sessionId);
+        return Unification.success(data, "咨询成功");
+    }
+
     @GetMapping("/qa/list")
     public Unification<List<AIConsultation>> getAllQA() {
         List<AIConsultation> qaList = aiConsultationService.getAllQA();
         return Unification.success(qaList, "查询成功");
     }
-    
-    /**
-     * 分页查询AI咨询问题列表（用于管理页面）
-     * @param keywords 关键词（可选）
-     * @param category 分类（可选）
-     * @param question 问题（可选）
-     * @param pageNo 页码
-     * @param pageSize 每页大小
-     * @return 分页结果
-     */
+
     @GetMapping("/qa/page")
     public Unification<Map<String, Object>> getQAPage(
             @RequestParam(value = "keywords", required = false) String keywords,
@@ -64,31 +90,23 @@ public class AIConsultationController {
             @RequestParam(value = "question", required = false) String question,
             @RequestParam("pageNo") Long pageNo,
             @RequestParam("pageSize") Long pageSize) {
-        
-        // 构造查询条件
+
         LambdaQueryWrapper<AIConsultation> wrapper = new LambdaQueryWrapper<>();
         wrapper.like(StringUtils.hasLength(keywords), AIConsultation::getKeywords, keywords);
         wrapper.eq(StringUtils.hasLength(category), AIConsultation::getCategory, category);
         wrapper.like(StringUtils.hasLength(question), AIConsultation::getQuestion, question);
         wrapper.orderByDesc(AIConsultation::getPriority);
         wrapper.orderByDesc(AIConsultation::getId);
-        
-        // 分页查询
+
         Page<AIConsultation> page = new Page<>(pageNo, pageSize);
         aiConsultationService.page(page, wrapper);
-        
-        // 将查询结果封装到Map中返回
+
         Map<String, Object> data = new HashMap<>();
         data.put("total", page.getTotal());
         data.put("rows", page.getRecords());
         return Unification.success(data);
     }
-    
-    /**
-     * 新增AI咨询问题
-     * @param aiQA AI咨询问题对象
-     * @return 操作结果
-     */
+
     @PostMapping("/qa")
     public Unification<?> addQA(@RequestBody AIConsultation aiQA) {
         boolean result = aiConsultationService.save(aiQA);
@@ -98,12 +116,7 @@ public class AIConsultationController {
             return Unification.fail("新增失败");
         }
     }
-    
-    /**
-     * 修改AI咨询问题
-     * @param aiQA AI咨询问题对象
-     * @return 操作结果
-     */
+
     @PutMapping("/qa")
     public Unification<?> updateQA(@RequestBody AIConsultation aiQA) {
         boolean result = aiConsultationService.updateById(aiQA);
@@ -113,23 +126,13 @@ public class AIConsultationController {
             return Unification.fail("修改失败");
         }
     }
-    
-    /**
-     * 根据ID获取AI咨询问题
-     * @param id 问题ID
-     * @return AI咨询问题对象
-     */
+
     @GetMapping("/qa/{id}")
     public Unification<AIConsultation> getQAById(@PathVariable("id") Integer id) {
         AIConsultation aiQA = aiConsultationService.getById(id);
         return Unification.success(aiQA);
     }
-    
-    /**
-     * 根据ID删除AI咨询问题
-     * @param id 问题ID
-     * @return 操作结果
-     */
+
     @DeleteMapping("/qa/{id}")
     public Unification<?> deleteQAById(@PathVariable("id") Integer id) {
         boolean result = aiConsultationService.removeById(id);
@@ -140,4 +143,3 @@ public class AIConsultationController {
         }
     }
 }
-

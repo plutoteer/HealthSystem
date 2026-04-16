@@ -3,7 +3,7 @@
   <div class="page-container">
     <!-- 页面标题区域 -->
     <div class="page-header">
-      <h2 class="page-title">身体信息管理</h2>
+      <h2 class="page-title">体检信息管理</h2>
       <p class="page-subtitle">管理您的身体信息数据，支持导出健康报告PDF</p>
     </div>
 

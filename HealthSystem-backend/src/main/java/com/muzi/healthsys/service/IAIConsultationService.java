@@ -4,26 +4,30 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.muzi.healthsys.entity.AIConsultation;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * AI健康咨询Service接口
- *
- * @author MuZi
- * @since 2025-01-XX
  */
 public interface IAIConsultationService extends IService<AIConsultation> {
-    
+
     /**
-     * 根据用户问题匹配最佳答案
-     * @param question 用户问题
-     * @return 最佳答案
+     * 兼容旧接口：单轮问答
      */
     String getAnswer(String question);
-    
+
+    /**
+     * 创建会话
+     */
+    String startSession(Integer userId);
+
+    /**
+     * 多轮对话（结构化引导 + 政策导航）
+     */
+    Map<String, Object> chat(String sessionId, Integer userId, String question);
+
     /**
      * 获取所有问答列表（用于管理）
-     * @return 问答列表
      */
     List<AIConsultation> getAllQA();
 }
-

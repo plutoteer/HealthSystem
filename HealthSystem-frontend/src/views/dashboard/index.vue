@@ -1,12 +1,5 @@
 <template>
   <div class="dashboard-container">
-    <el-row :gutter="20" style="margin-bottom: 20px;">
-      <el-col :span="24" style="text-align: right;">
-        <el-button type="primary" icon="el-icon-date" @click="openAppointmentDialog">
-          预约体检
-        </el-button>
-      </el-col>
-    </el-row>
 
     <el-row class="stats-row" :gutter="20">
       <el-col :span="6">
@@ -96,34 +89,6 @@
       </el-col>
     </el-row>
 
-    <el-dialog
-      title="预约体检"
-      :visible.sync="appointmentDialogVisible"
-      width="520px"
-      @close="resetAppointmentForm"
-    >
-      <el-form ref="appointmentFormRef" :model="appointmentForm" :rules="appointmentRules" label-width="90px">
-        <el-form-item label="体检时间" prop="examTime">
-          <el-date-picker
-            v-model="appointmentForm.examTime"
-            type="datetime"
-            placeholder="选择体检时间"
-            value-format="timestamp"
-            style="width: 100%;"
-          />
-        </el-form-item>
-        <el-form-item label="体检地点" prop="location">
-          <el-input v-model="appointmentForm.location" placeholder="如：XX医院体检中心" maxlength="100" show-word-limit />
-        </el-form-item>
-      </el-form>
-
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="appointmentDialogVisible = false">取 消</el-button>
-        <el-button type="primary" :loading="appointmentSubmitting" @click="submitAppointment">
-          提 交
-        </el-button>
-      </div>
-    </el-dialog>
   </div>
 </template>
 
@@ -132,7 +97,6 @@ import * as echarts from 'echarts'
 
 import userApi from '@/api/userManage'
 import FunctionApi from '@/api/Function_Menu'
-import appointmentApi from '@/api/appointment'
 export default {
   data() {
     return {
@@ -149,16 +113,6 @@ export default {
       date: [],
       heartRate: [],
 
-      appointmentDialogVisible: false,
-      appointmentSubmitting: false,
-      appointmentForm: {
-        examTime: null, // timestamp(ms)
-        location: ''
-      },
-      appointmentRules: {
-        examTime: [{ required: true, message: '请选择体检时间', trigger: 'change' }],
-        location: [{ required: true, message: '请输入体检地点', trigger: 'blur' }]
-      }
     }
   },
 
@@ -311,42 +265,6 @@ export default {
 
   async mounted() {},
   methods: {
-    openAppointmentDialog() {
-      this.appointmentDialogVisible = true
-    },
-
-    resetAppointmentForm() {
-      this.appointmentSubmitting = false
-      this.appointmentForm = {
-        examTime: null,
-        location: ''
-      }
-      if (this.$refs.appointmentFormRef) {
-        this.$refs.appointmentFormRef.clearValidate()
-      }
-    },
-
-    submitAppointment() {
-      if (this.appointmentSubmitting) return
-      this.$refs.appointmentFormRef.validate(async(valid) => {
-        if (!valid) return
-        this.appointmentSubmitting = true
-        try {
-          const payload = {
-            examTime: this.appointmentForm.examTime, // timestamp(ms)
-            location: this.appointmentForm.location
-          }
-          const res = await appointmentApi.createAppointment(payload)
-          this.$message.success(res.message || '预约成功')
-          this.appointmentDialogVisible = false
-          this.resetAppointmentForm()
-        } catch (e) {
-          this.$message.error((e && e.message) || '预约失败，请稍后重试')
-        } finally {
-          this.appointmentSubmitting = false
-        }
-      })
-    },
 
     getBMIStatus(bmi) {
       const bmiValue = parseFloat(bmi)

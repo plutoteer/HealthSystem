@@ -14,6 +14,19 @@ export default {
       url: '/appointment/my',
       method: 'get'
     })
+  },
+
+  // 管理员端：预约分页列表
+  getAppointmentList(searchModel) {
+    return request({
+      url: '/appointment/list',
+      method: 'get',
+      params: {
+        pageNo: searchModel.pageNo,
+        pageSize: searchModel.pageSize,
+        userId: searchModel.userId
+      }
+    })
   }
 }
 

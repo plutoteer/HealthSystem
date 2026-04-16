@@ -30,6 +30,14 @@ logging:
   level:
     com.muzi: debug
 
+# Dify（使用Ollama模型）配置
+ai:
+  dify:
+    enabled: true
+    base-url: "http://localhost/v1"
+    api-key: "app-zsYOmQPsT4rbiRqG9ksV4Asb"
+    timeout-ms: 15000
+
 #逻辑删除
 mybatis-plus:
   global-config:

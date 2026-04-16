@@ -11,33 +11,24 @@ import lombok.NoArgsConstructor;
 import java.io.Serializable;
 import java.util.Date;
 
+/**
+ * 管理员发布的体检场次（地区 + 时间）
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@TableName("j_physical_exam_appointment")
-public class PhysicalExamAppointment implements Serializable {
+@TableName("j_physical_exam_slot")
+public class PhysicalExamSlot implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
 
-    @TableField("user_id")
-    private Integer userId;
+    @TableField("region")
+    private String region;
 
-    @TableField("slot_id")
-    private Integer slotId;
-
-    /**
-     * 体检时间（精确到分钟/秒均可，建议 DATETIME）
-     */
     @TableField("exam_time")
     private Date examTime;
-
-    /**
-     * 体检地区/地点（来自管理员发布场次）
-     */
-    @TableField("location")
-    private String location;
 
     @TableField("created_at")
     private Date createdAt;

@@ -9,37 +9,40 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@TableName("j_physical_exam_appointment")
-public class PhysicalExamAppointment implements Serializable {
+@TableName("j_insurance_info")
+public class InsuranceInfo implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
 
-    @TableField("user_id")
-    private Integer userId;
+    @TableField("title")
+    private String title;
 
-    @TableField("slot_id")
-    private Integer slotId;
+    @TableField("insurance_year")
+    private String insuranceYear;
 
-    /**
-     * 体检时间（精确到分钟/秒均可，建议 DATETIME）
-     */
-    @TableField("exam_time")
-    private Date examTime;
+    @TableField("description")
+    private String description;
 
-    /**
-     * 体检地区/地点（来自管理员发布场次）
-     */
-    @TableField("location")
-    private String location;
+    @TableField("amount")
+    private BigDecimal amount;
+
+    @TableField("start_time")
+    private Date startTime;
+
+    @TableField("end_time")
+    private Date endTime;
+
+    @TableField("status")
+    private Integer status;
 
     @TableField("created_at")
     private Date createdAt;
 }
-
